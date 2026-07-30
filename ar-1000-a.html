@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR-1000-A // Fechador Robótico - VentaniYA</title>
+    <style>
+        :root {
+            --quantum-glow: #00ffcc;
+            --quantum-glow-dim: rgba(0, 255, 204, 0.4);
+            --quantum-bg-darkest: #050a0f;
+            --quantum-panel-bg: rgba(10, 25, 35, 0.85);
+            --text-bright: #e0fbfc;
+            --alert-red: #ff3366;
+        }
+
+        body {
+            background-color: var(--quantum-bg-darkest);
+            color: var(--text-bright);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--quantum-glow);
+            text-shadow: 0 0 10px var(--quantum-glow-dim);
+            letter-spacing: 2px;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #88c0d0;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .panel {
+            background: var(--quantum-panel-bg);
+            border: 1px solid var(--quantum-glow);
+            box-shadow: 0 0 15px var(--quantum-glow-dim);
+            border-radius: 8px;
+            padding: 20px;
+            flex: 1;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 1px solid var(--quantum-glow);
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--quantum-glow);
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-file-upload:hover {
+            background: var(--quantum-glow);
+            color: var(--quantum-bg-darkest);
+            box-shadow: 0 0 10px var(--quantum-glow);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            border: 1px dashed var(--quantum-glow);
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Efecto de escaneo láser */
+        .scanning-laser {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--alert-red);
+            box-shadow: 0 0 8px var(--alert-red);
+            animation: scanMove 2.5s infinite ease-in-out;
+            display: none;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        .hud-data {
+            width: 100%;
+            font-size: 0.8rem;
+            color: var(--quantum-glow);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-left: 3px solid var(--quantum-glow);
+            box-sizing: border-box;
+            line-height: 1.4;
+        }
+
+        .hud-data p {
+            margin: 4px 0;
+        }
+
+        .timeline-box {
+            width: 100%;
+            max-width: 940px;
+            background: var(--quantum-panel-bg);
+            border: 1px solid var(--quantum-glow);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+
+        .timeline-box h3 {
+            margin-top: 0;
+            color: var(--quantum-glow);
+            font-size: 1rem;
+            border-bottom: 1px dashed var(--quantum-glow-dim);
+            padding-bottom: 5px;
+        }
+
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        .step {
+            background: rgba(0,255,204,0.05);
+            border: 1px solid var(--quantum-glow-dim);
+            padding: 8px;
+            flex: 1;
+            min-width: 130px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .step strong {
+            color: var(--alert-red);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .download-btn {
+            background: var(--alert-red);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+            display: none;
+        }
+
+        .download-btn:hover {
+            background: #ff1a53;
+            box-shadow: 0 0 15px var(--alert-red);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AR-1000-A // FECHADOR ROBÓTICO</h1>
+    <div class="subtitle">VentaniYA - Sistema de Autenticación Táctica & Búho Holográfico</div>
+
+    <div class="main-container">
+        <!-- Panel de Carga y Visualización -->
+        <div class="panel">
+            <div class="controls">
+                <label for="fileInput" class="custom-file-upload">
+                    📥 Cargar Imagen Base
+                </label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <div class="canvas-container" id="canvasBox">
+                <div class="scanning-laser" id="laserScan"></div>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <button id="btnDescarga" class="download-btn">⬇ Descargar Imagen Estampada</button>
+        </div>
+
+        <!-- Panel HUD de Escaneo Lateral -->
+        <div class="panel" style="align-items: flex-start;">
+            <h3 style="color: var(--alert-red); margin-top:0; border-bottom: 1px solid var(--alert-red); width:100%; padding-bottom:5px;">VISOR TÁCTICO // HUD</h3>
+            <div class="hud-data" id="hudTerminal">
+                <p><strong>SISTEMA:</strong> STANDBY...</p>
+                <p><strong>ESTADO BUHO:</strong> Oculto (Esperando Input)</p>
+                <p><strong>SATELITE ENLACE:</strong> DESCONECTADO</p>
+                <p><strong>LATITUD / LONGITUD:</strong> --.------, --.------</p>
+                <p><strong>PESO DE FLUJO:</strong> 0 BYTES</p>
+                <p><strong>HASH SHA-256:</strong> PENDIENTE</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Línea de Tiempo y Seguridad -->
+    <div class="timeline-box">
+        <h3>REGISTRO CRONOLOGICO DE BLOQUES // POSTA 1001</h3>
+        <div class="timeline-steps">
+            <div class="step">
+                <strong>BLOQUE 01</strong>
+                Ingreso de Datos & Carga de Archivo crudo.
+            </div>
+            <div class="step">
+                <strong>BLOQUE 02</strong>
+                Escaneo Optico AR-1000-A & Telemetria Satelital.
+            </div>
+            <div class="step">
+                <strong>BLOQUE 03</strong>
+                Activacion de Sello Holografico Buho.
+            </div>
+            <div class="step">
+                <strong>BLOQUE 04</strong>
+                Firma de Sello Temporal & Hash Inalterable.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const laserScan = document.getElementById('laserScan');
+        const hudTerminal = document.getElementById('hudTerminal');
+        const btnDescarga = document.getElementById('btnDescarga');
+
+        let imagenCargada = new Image();
+
+        fileInput.addEventListener('change', function(e) {
+            const archivo = e.target.files[0];
+            if (!archivo) return;
+
+            // Activar efecto laser visual
+            laserScan.style.display = 'block';
+
+            const tamanoBytes = archivo.size;
+            const tamanoKB = (tamanoBytes / 1024).toFixed(2);
+
+            const lector = new FileReader();
+            lector.onload = function(event) {
+                imagenCargada.onload = function() {
+                    canvas.width = imagenCargada.width;
+                    canvas.height = imagenCargada.height;
+
+                    ctx.drawImage(imagenCargada, 0, 0);
+
+                    aplicarEstampadoRobotico(tamanoKB, archivo.name);
+
+                    setTimeout(() => {
+                        laserScan.style.display = 'none';
+                        btnDescarga.style.display = 'block';
+                    }, 1500);
+                }
+                imagenCargada.src = event.target.result;
+            }
+            lector.readAsDataURL(archivo);
+        });
+
+        function aplicarEstampadoRobotico(kb, nombreArchivo) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const fechaActual = new Date().toISOString().replace(/T/, ' // ').replace(/\..+/, '');
+            
+            const lat = "-38.0055° S";
+            const lon = "-57.5426° W";
+            const distanciaSat = "35,786 KM (SAT-GEO-V1)";
+            const hashSimulado = "0x" + Math.random().toString(16).substring(2, 12) + "..." + Math.random().toString(16).substring(2, 8);
+
+            // Franja Inferior de Datos
+            const alturaFranja = Math.max(70, h * 0.12);
+            ctx.fillStyle = "rgba(5, 10, 15, 0.9)";
+            ctx.fillRect(0, h - alturaFranja, w, alturaFranja);
+
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, h - alturaFranja);
+            ctx.lineTo(w, h - alturaFranja);
+            ctx.stroke();
+
+            ctx.fillStyle = "#e0fbfc";
+            ctx.font = `bold ${Math.max(12, w * 0.022)}px 'Courier New'`;
+            ctx.fillText(`POSTA 1001 // FECHA: ${fechaActual}`, 15, h - alturaFranja + 25);
+            
+            ctx.fillStyle = "#00ffcc";
+            ctx.font = `${Math.max(10, w * 0.018)}px 'Courier New'`;
+            ctx.fillText(`HASH: ${hashSimulado} | PESO: ${kb} KB`, 15, h - alturaFranja + 50);
+
+            // Sello del Buho Holográfico AR-1000-A
+            const selloAncho = Math.max(160, w * 0.28);
+            const selloAlto = Math.max(65, h * 0.12);
+            const selloX = w - selloAncho - 20;
+            const selloY = 20;
+
+            ctx.fillStyle = "rgba(0, 255, 204, 0.15)";
+            ctx.fillRect(selloX, selloY, selloAncho, selloAlto);
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(selloX, selloY, selloAncho, selloAlto);
+
+            ctx.fillStyle = "#ff3366";
+            ctx.font = `bold ${Math.max(11, w * 0.018)}px 'Courier New'`;
+            ctx.fillText("🦉 AR-1000-A HOLOGRAPHIC", selloX + 10, selloY + 22);
+
+            ctx.fillStyle = "#e0fbfc";
+            ctx.font = `${Math.max(9, w * 0.014)}px 'Courier New'`;
+            ctx.fillText("ESTADO: BUHO ACTIVO", selloX + 10, selloY + 42);
+            ctx.fillText("VENTANIYA // 1001", selloX + 10, selloY + 58);
+
+            // Actualizar panel HUD lateral
+            hudTerminal.innerHTML = `
+                <p style="color:#00ffcc"><strong>SISTEMA:</strong> ESCANEO COMPLETADO OK</p>
+                <p style="color:#ff3366"><strong>ESTADO BUHO:</strong> HOLOGRAFO AR-1000-A [ONLINE]</p>
+                <p><strong>SATELITE ENLACE:</strong> ${distanciaSat}</p>
+                <p><strong>LATITUD / LONGITUD:</strong> ${lat} / ${lon}</p>
+                <p><strong>ARCHIVO / PESO:</strong> ${nombreArchivo} (${kb} KB)</p>
+                <p style="word-break: break-all;"><strong>HASH CRIPTOGRAFICO:</strong> ${hashSimulado}</p>
+            `;
+        }
+
+        btnDescarga.addEventListener('click', function() {
+            const enlace = document.createElement('a');
+            enlace.download = 'AR-1000-A_Estampado_Ventaniya.png';
+            enlace.href = canvas.toDataURL('image/png');
+            enlace.click();
+        });
+    </script>
+</body>
+</html>
